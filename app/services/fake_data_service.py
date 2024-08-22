@@ -1,18 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import User, Book, Review
-from app.auth import get_password_hash
-from faker import Faker
 import random
+
+from faker import Faker
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app.auth import get_password_hash
+from app.database import get_db
+from app.models import Book, Review, User
 
 fake = Faker()
 
+
 def generate_fake_data(
-    user_count: int = 10, 
-    book_count: int = 20, 
-    review_count: int = 100, 
-    db: Session = Depends(get_db)
+    user_count: int = 10,
+    book_count: int = 20,
+    review_count: int = 100,
+    db: Session = Depends(get_db),
 ):
     # Generate fake users
     users = []
@@ -32,10 +35,12 @@ def generate_fake_data(
         book = Book(
             title=fake.sentence(nb_words=4),
             author=f"{fake.first_name()} {fake.last_name()}",
-            genre=random.choice(["Fiction", "Science Fiction", "Non-Fiction", "Fantasy"]),
+            genre=random.choice(
+                ["Fiction", "Science Fiction", "Non-Fiction", "Fantasy"]
+            ),
             year_of_publication=random.randint(1950, 2024),
             content=fake.paragraph(nb_sentences=10),
-            summary=fake.paragraph(nb_sentences=2)
+            summary=fake.paragraph(nb_sentences=2),
         )
         db.add(book)
         books.append(book)
@@ -47,8 +52,7 @@ def generate_fake_data(
             book_id=random.choice(books).id,
             user_id=random.choice(users).id,
             review_text=fake.paragraph(nb_sentences=3),
-            rating=random.randint(1, 5)
+            rating=random.randint(1, 5),
         )
         db.add(review)
     db.commit()
-

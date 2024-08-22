@@ -1,31 +1,62 @@
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import FastAPI
 
-from .services import fake_data_service
-from .database import init_db, SessionLocal
-from . import models, schemas, auth
-from fastapi.middleware.cors import CORSMiddleware
-from .routers import books, auth, users, admin, reviews, recommendations, summarization
-from .services import create_admin_service
+from .database import init_db
+from .routers import admin, auth, books, recommendations, reviews, summarization, users
 
 load_dotenv()  # Load environment variables from .env
+
 
 def create_app():
     app = FastAPI()
 
     app = FastAPI(
-    title="Book Management System API",
-    description="API for managing books, users, reviews, and recommendations in the Book Management System",
-    version="1.0.0",
-    openapi_tags=[
-        {"name": "User Management", "description": "Operations related to user registration, authentication, and profile management."},
-        {"name": "Book Management", "description": "Operations for creating, retrieving, updating, and deleting books."},
-        {"name": "Review Management", "description": "Operations for adding, updating, and deleting reviews of books."},
-        {"name": "Recommendations", "description": "Operations for generating and retrieving book recommendations."},
-        {"name": "Book Summarization", "description": "Operations related to generating summaries for books."},
-        {"name": "Admin", "description": "Administrative operations including user and review management."},
-    ]
+        title="Book Management System API",
+        description=(
+            "API for managing books, users, reviews, and recommendations "
+            "in the Book Management System"
+        ),
+        version="1.0.0",
+        openapi_tags=[
+            {
+                "name": "User Management",
+                "description": (
+                    "Operations related to user registration, "
+                    "authentication, and profile management."
+                ),
+            },
+            {
+                "name": "Book Management",
+                "description": (
+                    "Operations for creating, retrieving, updating, "
+                    "and deleting books."
+                ),
+            },
+            {
+                "name": "Review Management",
+                "description": (
+                    "Operations for adding, updating, and deleting " "reviews of books."
+                ),
+            },
+            {
+                "name": "Recommendations",
+                "description": (
+                    "Operations for generating and retrieving book " "recommendations."
+                ),
+            },
+            {
+                "name": "Book Summarization",
+                "description": (
+                    "Operations related to generating summaries for " "books."
+                ),
+            },
+            {
+                "name": "Admin",
+                "description": (
+                    "Administrative operations including user and " "review management."
+                ),
+            },
+        ],
     )
 
     # Include the routers
@@ -47,8 +78,10 @@ def create_app():
 
     return app
 
+
 app = create_app()
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")

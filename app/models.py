@@ -1,8 +1,10 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
-from sqlalchemy.orm import relationship, declarative_base
 import datetime
 
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import declarative_base, relationship
+
 Base = declarative_base()
+
 
 class User(Base):
     __tablename__ = "users"
@@ -17,6 +19,7 @@ class User(Base):
     preferences = relationship("UserPreferences", back_populates="user", uselist=False)
     recommendations = relationship("Recommendation", back_populates="user")
 
+
 class Book(Base):
     __tablename__ = "books"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -25,9 +28,12 @@ class Book(Base):
     genre = Column(String, index=True)
     year_of_publication = Column(Integer)
     content = Column(Text)
-    summary = Column(Text, default="Summary is being generated")  # New field to store the book summary
+    summary = Column(
+        Text, default="Summary is being generated"
+    )  # New field to store the book summary
 
     reviews = relationship("Review", back_populates="book")
+
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -40,9 +46,10 @@ class Review(Base):
     book = relationship("Book", back_populates="reviews")
     user = relationship("User")
 
+
 class UserPreferences(Base):
     __tablename__ = "user_preferences"
-    
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     preferred_genres = Column(String, nullable=False)
@@ -50,13 +57,18 @@ class UserPreferences(Base):
 
     user = relationship("User", back_populates="preferences")
 
+
 class Recommendation(Base):
     __tablename__ = "recommendations"
-    
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    recommended_books = Column(Text, nullable=False)  # Store book IDs as JSON or comma-separated list
+    recommended_books = Column(
+        Text, nullable=False
+    )  # Store book IDs as JSON or comma-separated list
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
-    
+    updated_at = Column(
+        DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow
+    )
+
     user = relationship("User", back_populates="recommendations")
