@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment Variables
+.env
+
+# Logs
+*.log
+
+# Virtual environment
+venv/
+.venv/
+
+# AWS configuration
+.aws/
+
+# VSCode Ide
+.vscode/
+
+# Recommendation
+recommendation_model.pkl
+test.db
