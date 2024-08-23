@@ -1,4 +1,12 @@
-def test_generate_book_summary(client, create_test_book, admin_token):
+from unittest.mock import patch
+
+
+@patch("app.routers.summarization.generate_summary_for_content")
+def test_generate_book_summary(
+    mock_generate_summary, client, create_test_book, admin_token
+):
+    # Set up the mock to return a specific value
+    mock_generate_summary.return_value = "This is a mocked summary."
     book_id = create_test_book["id"]
     headers = {"Authorization": f"Bearer {admin_token}"}
 
@@ -7,10 +15,16 @@ def test_generate_book_summary(client, create_test_book, admin_token):
     assert response.status_code == 200
     data = response.json()
     assert "summary" in data
-    assert len(data["summary"]) > 0  # Ensure that the summary is generated
+    assert (
+        data["summary"] == "This is a mocked summary."
+    )  # Ensure that the summary is generated
 
 
-def test_generate_review_summary(client, create_test_review, admin_token):
+@patch("app.routers.summarization.generate_summary_for_reviews")
+def test_generate_review_summary(
+    mock_generate_review_summary, client, create_test_review, admin_token
+):
+    mock_generate_review_summary.return_value = "This is a mocked review summary."
     book_id = create_test_review["book_id"]
     headers = {"Authorization": f"Bearer {admin_token}"}
 
@@ -21,7 +35,9 @@ def test_generate_review_summary(client, create_test_review, admin_token):
     assert response.status_code == 200
     data = response.json()
     assert "summary" in data
-    assert len(data["summary"]) > 0  # Ensure that the summary is generated
+    assert (
+        data["summary"] == "This is a mocked review summary."
+    )  # Ensure that the summary is generated
     assert "reviews" in data
     assert len(data["reviews"]) > 0  # Ensure that reviews were used
 

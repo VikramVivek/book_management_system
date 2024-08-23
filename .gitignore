@@ -26,3 +26,4 @@ venv/
 # Recommendation
 recommendation_model.pkl
 test.db
+.coverage
