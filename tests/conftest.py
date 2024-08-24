@@ -7,6 +7,7 @@ from app import auth, models
 from app.database import Base, get_db
 from app.main import create_app
 
+# Configuration for the test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
@@ -16,18 +17,23 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture(scope="function", autouse=True)
 def setup_database():
-    # Ensure a clean test database
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    """
+    Fixture to set up and tear down the test database.
+    Ensures a clean state before each test and cleans up after the test is run.
+    """
+    Base.metadata.drop_all(bind=engine)  # Drop all tables before creating new ones
+    Base.metadata.create_all(bind=engine)  # Create tables
     yield
-    # Cleanup database after each test
-    Base.metadata.drop_all(bind=engine)
+    Base.metadata.drop_all(bind=engine)  # Drop all tables after test execution
 
 
-# Override the dependency for `get_db`
 def override_get_db():
+    """
+    Dependency override for getting a database session.
+    This override provides a session from the test database.
+    """
+    db = TestingSessionLocal()
     try:
-        db = TestingSessionLocal()
         yield db
     finally:
         db.close()
@@ -35,7 +41,10 @@ def override_get_db():
 
 @pytest.fixture(scope="function")
 def app():
-    # Set up the app and dependency overrides
+    """
+    Fixture to create the FastAPI app with dependency overrides.
+    This allows tests to use the test database instead of the production database.
+    """
     app = create_app()
     app.dependency_overrides[get_db] = override_get_db
     yield app
@@ -43,11 +52,18 @@ def app():
 
 @pytest.fixture(scope="function")
 def client(app):
+    """
+    Fixture to create a test client for sending requests to the FastAPI app.
+    """
     return TestClient(app)
 
 
 @pytest.fixture(scope="function")
 def db_session():
+    """
+    Fixture to create a database session for use in tests.
+    The session is automatically closed after each test.
+    """
     db = TestingSessionLocal()
     try:
         yield db
@@ -57,11 +73,13 @@ def db_session():
 
 @pytest.fixture(scope="function")
 def admin_token(client, db_session):
-    # Check if the admin already exists
+    """
+    Fixture to create an admin user and return a valid JWT token for the admin.
+    The admin user is created only if it does not already exist.
+    """
     existing_admin = (
         db_session.query(models.User).filter_by(email="admin@example.com").first()
     )
-    # If the admin does not exist, create a new one
     if not existing_admin:
         db_session.add(
             models.User(
@@ -73,7 +91,6 @@ def admin_token(client, db_session):
         )
         db_session.commit()
 
-    # Now get the token for the user (whether newly created or existing)
     response = client.post(
         "/auth/token",
         data={"username": "admin@example.com", "password": "adminpassword"},
@@ -83,11 +100,13 @@ def admin_token(client, db_session):
 
 @pytest.fixture(scope="function")
 def user_token(client, db_session):
-    # Check if the user already exists
+    """
+    Fixture to create a regular user and return a valid JWT token for the user.
+    The user is created only if it does not already exist.
+    """
     existing_user = (
         db_session.query(models.User).filter_by(email="testuser@example.com").first()
     )
-    # If the user does not exist, create a new one
     if not existing_user:
         db_session.add(
             models.User(
@@ -99,7 +118,6 @@ def user_token(client, db_session):
         )
         db_session.commit()
 
-    # Now get the token for the user (whether newly created or existing)
     response = client.post(
         "/auth/token",
         data={"username": "testuser@example.com", "password": "testpassword"},
@@ -109,6 +127,10 @@ def user_token(client, db_session):
 
 @pytest.fixture(scope="function")
 def create_test_book(client, admin_token):
+    """
+    Fixture to create a test book using the admin credentials.
+    Returns the JSON response of the created book.
+    """
     headers = {"Authorization": f"Bearer {admin_token}"}
     response = client.post(
         "/books",
@@ -126,6 +148,10 @@ def create_test_book(client, admin_token):
 
 @pytest.fixture(scope="function")
 def create_test_review(client, user_token, create_test_book):
+    """
+    Fixture to create a test review for the test book.
+    Returns the JSON response of the created review.
+    """
     headers = {"Authorization": f"Bearer {user_token}"}
     book_id = create_test_book["id"]
     response = client.post(
@@ -139,6 +165,10 @@ def create_test_review(client, user_token, create_test_book):
 
 @pytest.fixture(scope="function")
 def set_user_preferences(client, user_token):
+    """
+    Fixture to set user preferences for the logged-in user.
+    Returns the JSON response of the set preferences.
+    """
     headers = {"Authorization": f"Bearer {user_token}"}
     response = client.post(
         "/users/preferences/",

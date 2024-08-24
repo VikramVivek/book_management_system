@@ -1,3 +1,10 @@
+"""
+Configuration module for the application.
+
+This module contains constants and environment variables that define
+the configuration of the application.
+"""
+
 import os
 
 from dotenv import load_dotenv

@@ -1,3 +1,4 @@
+import logging
 import random
 
 from faker import Faker
@@ -8,7 +9,11 @@ from app.auth import get_password_hash
 from app.database import get_db
 from app.models import Book, Review, User, UserPreferences
 
+# Initialize Faker
 fake = Faker()
+
+# Set up logger
+logger = logging.getLogger("app.fake_data_service")
 
 # Example positive, negative, and neutral review templates
 positive_templates = [
@@ -46,10 +51,27 @@ genres = [
 
 
 def generate_realistic_content():
+    """
+    Generate realistic content for a book.
+
+    Returns:
+        str: Generated content.
+    """
     return fake.text(max_nb_chars=5000)
 
 
 def generate_review(genre, author, sentiment):
+    """
+    Generate a review based on the genre, author, and sentiment.
+
+    Args:
+        genre (str): Genre of the book.
+        author (str): Author of the book.
+        sentiment (str): Sentiment of the review ('positive', 'negative', or 'neutral').
+
+    Returns:
+        str: Generated review text.
+    """
     if sentiment == "positive":
         template = random.choice(positive_templates)
     elif sentiment == "negative":
@@ -69,8 +91,23 @@ def generate_fake_data(
     neutral_review_percent: int = 25,
     db: Session = Depends(get_db),
 ):
+    """
+    Generate fake data for users, books, and reviews.
+
+    Args:
+        user_count (int): Number of users to generate.
+        book_count (int): Number of books to generate.
+        review_count (int): Number of reviews to generate.
+        positive_review_percent (int): Percentage of positive reviews.
+        negative_review_percent (int): Percentage of negative reviews.
+        neutral_review_percent (int): Percentage of neutral reviews.
+        db (Session): Database session dependency.
+    """
+    logger.info("Starting to generate fake data.")
+
     # Generate fake users and their preferences
     users = []
+    logger.debug(f"Generating {user_count} users with preferences.")
     for _ in range(user_count):
         user = User(
             email=fake.email(),
@@ -95,6 +132,7 @@ def generate_fake_data(
 
     # Generate fake books
     books = []
+    logger.debug(f"Generating {book_count} books.")
     for _ in range(book_count):
         genre = random.choice(genres)
         author = f"{fake.first_name()} {fake.last_name()}"
@@ -111,6 +149,7 @@ def generate_fake_data(
     db.commit()
 
     # Generate fake reviews
+    logger.debug(f"Generating {review_count} reviews.")
     for _ in range(review_count):
         sentiment = random.choices(
             ["positive", "negative", "neutral"],
@@ -134,3 +173,5 @@ def generate_fake_data(
         )
         db.add(review)
     db.commit()
+
+    logger.info("Fake data generation completed successfully.")
