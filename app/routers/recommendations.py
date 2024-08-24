@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.services.user_service import fetch_user_preferences
+
 from .. import database
 from ..services.recommendation_service import (
     compute_recommendation,
@@ -24,7 +26,8 @@ def calculate_recommendation(user_id: int, db: Session = Depends(database.get_db
 @router.get("/{user_id}", tags=["Recommendations"])
 def fetch_recommendations(user_id: int, db: Session = Depends(database.get_db)):
     try:
-        recommended_books = get_recommendations(db, user_id)
+        user_preferences = fetch_user_preferences(db, user_id)
+        recommended_books = get_recommendations(db, user_preferences)
     except Exception as e:
         raise HTTPException(
             status_code=404, detail=f"Could not find recommendation. Exception: {e}"

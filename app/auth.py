@@ -8,11 +8,12 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from . import database, models, schemas
+from .config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
 
 # Configuration for JWT
-SECRET_KEY = "your_secret_key"  # Replace with your actual secret key
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 3000  # Set the desired expiration time for the token
+# SECRET_KEY = "your_secret_key"  # Replace with your actual secret key
+# ALGORITHM = "HS256"
+# ACCESS_TOKEN_EXPIRE_MINUTES = 3000  # Set the desired expiration time for the token
 
 # Password hashing utility
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

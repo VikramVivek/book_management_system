@@ -60,7 +60,7 @@ def test_get_book_by_id(client, user_token, create_test_book):
 def test_update_book(client, admin_token, create_test_book):
     headers = {"Authorization": f"Bearer {admin_token}"}
     book_id = create_test_book["id"]
-    response = client.put(
+    response = client.patch(
         f"/books/{book_id}",
         json={
             "title": "Updated Book Title",

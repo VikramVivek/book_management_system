@@ -150,10 +150,21 @@ def fake_data(
     user_count: int = 10,
     book_count: int = 20,
     review_count: int = 100,
+    positive_review_percent: int = 50,
+    negative_review_percent: int = 25,
+    neutral_review_percent: int = 25,
     db: Session = Depends(database.get_db),
 ):
     try:
-        generate_fake_data(user_count, book_count, review_count, db)
+        generate_fake_data(
+            user_count,
+            book_count,
+            review_count,
+            positive_review_percent,
+            negative_review_percent,
+            neutral_review_percent,
+            db,
+        )
     except Exception as e:
         raise HTTPException(
             status_code=503, detail=f"Fake Data Not Generated. Exception: {e}"
@@ -182,3 +193,16 @@ def create_admin_for_test(
 def train_model_endpoint(db: Session = Depends(database.get_db)):
     result = train_recommendation_model(db)
     return result
+
+
+@router.post("/reset-database", tags=["Admin", "Setup Test Env"])
+def reset_db_for_test(
+    db: Session = Depends(database.get_db),
+):
+    try:
+        database.reset_db()
+    except Exception as e:
+        raise HTTPException(
+            status_code=503, detail=f"Database reset failed. Exception: {e}"
+        )
+    return {"detail": "Database reset successfull"}

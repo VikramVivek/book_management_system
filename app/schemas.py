@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from fastapi import Form
 from pydantic import BaseModel, EmailStr
 
 
@@ -65,6 +66,16 @@ class Review(ReviewBase):
         orm_mode = True
 
 
+class OAuth2PasswordRequestFormCustom:
+    def __init__(
+        self,
+        username: str = Form(...),
+        password: str = Form(...),
+    ):
+        self.username = username
+        self.password = password
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -89,6 +100,7 @@ class UserPreferences(UserPreferencesBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
 class RecommendationBase(BaseModel):

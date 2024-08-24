@@ -1,7 +1,7 @@
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 
-@patch("app.routers.summarization.generate_summary_for_content")
+@patch("app.routers.summarization.generate_summary_for_content", new_callable=AsyncMock)
 def test_generate_book_summary(
     mock_generate_summary, client, create_test_book, admin_token
 ):

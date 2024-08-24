@@ -12,12 +12,12 @@ router = APIRouter()
 
 
 @router.post("/books/{book_id}/summary", tags=["Book Summarization"])
-def generate_book_summary(book_id: int, db: Session = Depends(get_db)):
+async def generate_book_summary(book_id: int, db: Session = Depends(get_db)):
     book = db.query(Book).filter(Book.id == book_id).first()
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
 
-    summary = generate_summary_for_content(book.content)
+    summary = await generate_summary_for_content(book.content)
     book.summary = summary
     db.commit()
 

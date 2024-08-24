@@ -7,20 +7,6 @@ from .. import auth, database, models, schemas
 router = APIRouter()
 
 
-# Get a review
-@router.get("/{review_id}", response_model=schemas.Review, tags=["Review Management"])
-def read_review(
-    review_id: int,
-    db: Session = Depends(database.get_db),
-    current_user: schemas.User = Depends(auth.get_current_user),
-):
-    result = db.execute(select(models.Review).filter(models.Review.id == review_id))
-    db_review = result.scalar_one_or_none()
-    if db_review is None:
-        raise HTTPException(status_code=404, detail="Review not found")
-    return db_review
-
-
 # Add a review
 @router.post("/", response_model=schemas.Review, tags=["Review Management"])
 def create_review(
@@ -33,6 +19,20 @@ def create_review(
     db.add(db_review)
     db.commit()
     db.refresh(db_review)
+    return db_review
+
+
+# Get a review
+@router.get("/{review_id}", response_model=schemas.Review, tags=["Review Management"])
+def read_review(
+    review_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: schemas.User = Depends(auth.get_current_user),
+):
+    result = db.execute(select(models.Review).filter(models.Review.id == review_id))
+    db_review = result.scalar_one_or_none()
+    if db_review is None:
+        raise HTTPException(status_code=404, detail="Review not found")
     return db_review
 
 

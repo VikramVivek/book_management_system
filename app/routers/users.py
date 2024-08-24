@@ -9,15 +9,6 @@ from ..auth import get_current_user, get_password_hash
 router = APIRouter()
 
 
-@router.get("/me", response_model=schemas.User, tags=["User Management"])
-def read_user_me(current_user: schemas.User = Depends(get_current_user)):
-    """
-    Get current user's profile information.
-    """
-    logging.error("From users.py /me")
-    return current_user
-
-
 @router.put("/me", response_model=schemas.User, tags=["User Management"])
 def update_user_me(
     user_update: schemas.UserCreate,  # You can define a more specific schema if needed
@@ -44,6 +35,15 @@ def update_user_me(
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.get("/me", response_model=schemas.User, tags=["User Management"])
+def read_user_me(current_user: schemas.User = Depends(get_current_user)):
+    """
+    Get current user's profile information.
+    """
+    logging.error("From users.py /me")
+    return current_user
 
 
 @router.post(

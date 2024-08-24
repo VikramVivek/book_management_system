@@ -1,15 +1,12 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from .. import auth, database, models, schemas
 from ..auth import create_access_token, get_password_hash
 
 router = APIRouter()
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 @router.post("/register", response_model=schemas.User, tags=["User Management"])
@@ -42,7 +39,7 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_d
 
 @router.post("/token", response_model=schemas.Token, tags=["User Management"])
 def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    form_data: schemas.OAuth2PasswordRequestFormCustom = Depends(),
     db: Session = Depends(database.get_db),
 ):
     user = (

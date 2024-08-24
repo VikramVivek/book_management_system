@@ -1,10 +1,8 @@
-from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from .config import HOST, LOG_LEVEL, PORT
 from .database import init_db
 from .routers import admin, auth, books, recommendations, reviews, summarization, users
-
-load_dotenv()  # Load environment variables from .env
 
 
 def create_app():
@@ -18,6 +16,13 @@ def create_app():
         ),
         version="1.0.0",
         openapi_tags=[
+            {
+                "name": "Setup Test Env",
+                "description": (
+                    "For testing APIs, initial setup of dummy"
+                    "data, admin creation and resetting database."
+                ),
+            },
             {
                 "name": "User Management",
                 "description": (
@@ -84,4 +89,4 @@ app = create_app()
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run(app, host=HOST, port=PORT, log_level=LOG_LEVEL)

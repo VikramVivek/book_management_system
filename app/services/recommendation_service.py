@@ -1,13 +1,27 @@
 import json
+import os
 import pickle
 from datetime import datetime
 
+import boto3
 from fastapi import HTTPException
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neighbors import NearestNeighbors
 from sqlalchemy.orm import Session
 
 from app.models import Book, Recommendation, User, UserPreferences
+
+from ..config import REDIS_CACHE_TTL
+from .mock_redis_service import redis_client
+
+CACHE_TTL = REDIS_CACHE_TTL  # Cache Time-To-Live in seconds
+
+# Use an environment variable to switch between local and AWS SageMaker
+USE_SAGEMAKER = os.getenv("USE_SAGEMAKER", "false").lower() == "true"
+
+if USE_SAGEMAKER:
+    sagemaker_runtime = boto3.client("sagemaker-runtime", region_name="your-region")
+    sagemaker_endpoint_name = "your-sagemaker-endpoint-name"
 
 
 def train_recommendation_model(db: Session):
@@ -34,6 +48,28 @@ def train_recommendation_model(db: Session):
 
 
 def get_recommendations(db: Session, user_preferences: UserPreferences):
+    # Generate a unique cache key based on user preferences
+    cache_key = f"recommendations:{user_preferences.user_id}"
+
+    # Check if recommendations are already in the cache
+    cached_recommendations = redis_client.get(cache_key)
+    if cached_recommendations:
+        return json.loads(cached_recommendations)
+
+    if USE_SAGEMAKER:
+        recommended_books = get_recommendations_from_sagemaker(user_preferences)
+    else:
+        recommended_books = get_recommendations_locally(db, user_preferences)
+
+    # Cache the recommendations with an expiration time
+    redis_client.setex(
+        cache_key, CACHE_TTL, json.dumps([book.id for book in recommended_books])
+    )
+
+    return recommended_books
+
+
+def get_recommendations_locally(db: Session, user_preferences: UserPreferences):
     # Load the trained model and vectorizer
     with open("recommendation_model.pkl", "rb") as model_file:
         model, vectorizer, book_ids = pickle.load(model_file)
@@ -53,6 +89,25 @@ def get_recommendations(db: Session, user_preferences: UserPreferences):
     return recommended_books
 
 
+def get_recommendations_from_sagemaker(user_preferences: UserPreferences):
+    payload = json.dumps(
+        {
+            "preferred_genres": user_preferences.preferred_genres,
+            "preferred_authors": user_preferences.preferred_authors,
+        }
+    )
+
+    response = sagemaker_runtime.invoke_endpoint(
+        EndpointName=sagemaker_endpoint_name,
+        ContentType="application/json",
+        Body=payload,
+    )
+
+    recommendations = json.loads(response["Body"].read().decode())
+
+    return recommendations
+
+
 def precompute_recommendations_for_all_users(db: Session):
     users = db.query(User).all()
     for user in users:
@@ -64,8 +119,7 @@ def precompute_recommendations_for_all_users(db: Session):
             continue
 
         # Get personalized recommendations based on the model
-        recommended_books = get_recommendations(db, user_preferences)
-        recommended_books_ids = [book.id for book in recommended_books]
+        recommended_books_ids = get_recommendations(db, user_preferences)
         recommended_books_serialized = json.dumps(recommended_books_ids)
 
         existing_recommendation = (
@@ -94,8 +148,7 @@ def compute_recommendation(db: Session, user_id: int):
         raise HTTPException(status_code=404, detail="User preference not set")
 
     # Get personalized recommendations based on the model
-    recommended_books = get_recommendations(db, user_preferences)
-    recommended_books_ids = [book.id for book in recommended_books]
+    recommended_books_ids = get_recommendations(db, user_preferences)
     recommended_books_serialized = json.dumps(recommended_books_ids)
 
     existing_recommendation = (
