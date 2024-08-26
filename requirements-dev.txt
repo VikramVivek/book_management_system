@@ -1,0 +1,7 @@
+-r requirements.txt
+
+#dev
+pytest
+isort
+black
+flake8
