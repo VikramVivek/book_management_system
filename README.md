@@ -101,13 +101,18 @@ The Book Management System is a web application designed to manage books, review
 5. **Connect to AWS Services**: 
     Update your application to connect to the deployed AWS services.
 
-## Running Tests
+## Running Tests and Coverage 
 
 1. **Unit Tests**:
     Run tests using pytest to verify the functionality of the backend services.
     ```
     pip install -r requirements-dev.txt
     pytest
+    ```
+2. **Test Coverage**:
+    Run coverage using pytest to verify the coverage of the testing.
+    ```
+    pytest --cov=app --cov-report=term
     ```
 
 ## Known Issues and Limitations
