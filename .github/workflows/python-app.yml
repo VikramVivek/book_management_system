@@ -11,8 +11,22 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:14
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
     - uses: actions/checkout@v4
@@ -45,6 +59,17 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
+    - name: Set up database
+      env:
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"
+      run: |
+        # Run migrations or any setup needed
+        echo "Setting up the database..."
+        # Example: run migration commands here if applicable
+        # e.g., alembic upgrade head or similar command
+
     - name: Test with pytest and coverage
+      env:
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"
       run: |
         pytest --cov=app --cov-report=term
