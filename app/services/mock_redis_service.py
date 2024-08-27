@@ -57,12 +57,9 @@ class MockRedisClientWithTTL:
 
 if USE_MOCK_REDIS:
     logger.info("Using MockRedisClientWithTTL as the Redis client.")
-    RedisClient = MockRedisClientWithTTL
+    redis_client = MockRedisClientWithTTL()
 else:
     logger.info("Using real Redis client.")
-    RedisClient = redis.StrictRedis.from_url(
+    redis_client = redis.StrictRedis.from_url(
         os.getenv("REDIS_URL", "redis://localhost:6379/0")
     )
-
-# Instantiate the Redis client
-redis_client = RedisClient()
