@@ -1,0 +1,9 @@
+-r requirements.txt
+
+#dev
+pytest
+isort
+black
+flake8
+coverage 
+pytest-cov

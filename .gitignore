@@ -27,3 +27,6 @@ venv/
 recommendation_model.pkl
 test.db
 .coverage
+
+# Testing
+.htmlcov

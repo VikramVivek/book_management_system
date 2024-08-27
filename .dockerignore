@@ -1,0 +1,38 @@
+# Ignore Python cache files and directories
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environments
+.venv/
+env/
+venv/
+
+# Ignore git repository files
+.git/
+.gitignore
+
+# Ignore pytest cache
+.pytest_cache/
+
+# Ignore any other unnecessary files
+*.log
+*.db
+
+# AWS configuration
+.aws/
+
+# VSCode Ide
+.vscode/
+
+# Recommendation
+recommendation_model.pkl
+test.db
+.coverage
+
+# Testing
+.htmlcov
+.flake8
+.coveragerc
+.pre-commit-config.yml
+pyproject.toml

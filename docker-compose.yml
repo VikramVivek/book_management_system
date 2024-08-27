@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: book_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: T3sting
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - booknetwork
+
+  app:
+    build: .
+    env_file: .env
+    depends_on:
+      - db
+    networks:
+      - booknetwork
+    ports:
+      - "8000:8000"
+
+networks:
+  booknetwork:
+
+volumes:
+  postgres_data:

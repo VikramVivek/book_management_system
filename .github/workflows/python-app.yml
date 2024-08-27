@@ -11,8 +11,22 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:14
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
     - uses: actions/checkout@v4
@@ -26,15 +40,14 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements-dev.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install coverage pytest-cov
+        pip install -r requirements-dev.txt
 
     - name: Run pre-commit hooks
       run: |
@@ -46,6 +59,31 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Test with pytest and coverage
+    - name: Set up database
+      env:
+        ENVIRONMENT: dev
+        LOG_LEVEL: DEBUG
+        HOST: 0.0.0.0
+        PORT: 8000
+        DEBUG: "True"
+        ALLOWED_HOSTS: localhost,127.0.0.1
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"
+        SECRET_KEY: your_secret_key
+        ALGORITHM: HS256
+        ACCESS_TOKEN_EXPIRE_MINUTES: 30
+        REDIS_URL: redis://localhost:6379/0
+        REDIS_CACHE_TTL: 3600
+        USE_MOCK_REDIS: "True"
+        SAGEMAKER_ENDPOINT: recommendation-endpoint
+        USE_SAGEMAKER: "False"
       run: |
-        pytest --cov=app --cov-report=term --cov-report=html
+        # Run migrations or any setup needed
+        echo "Setting up the database..."
+        # Example: run migration commands here if applicable
+        # e.g., alembic upgrade head or similar command
+
+    - name: Test with pytest and coverage
+      env:
+        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"
+      run: |
+        pytest --cov=app --cov-report=term

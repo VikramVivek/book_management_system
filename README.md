@@ -6,12 +6,12 @@ The Book Management System is a web application designed to manage books, review
 
 ## Features
 
-- **User Management**: Register, login, and manage user profiles.
+- **User Management**: Register, login, and manage user preferences.
 - **Book Management**: Create, view, update, and delete books.
 - **Review Management**: Add, edit, and delete reviews for books.
 - **Book Summarization**: Automatically generate summaries for books and reviews.
 - **Book Recommendations**: Provide personalized book recommendations based on user preferences.
-- **Admin Panel**: Manage users, reviews, and data.
+- **Admin Panel**: Admin access, Manage users, reviews, build recommendation model and data.
 
 ## Technologies
 
@@ -23,7 +23,8 @@ The Book Management System is a web application designed to manage books, review
 
 ## Prerequisites
 
-- **Python 3.9**
+- **Python 3.9.13**
+- **Docker** (for containerized deployment)
 - **PostgreSQL**
 - **Node.js and npm** (for frontend development)
 - **AWS Account** with access to EC2, RDS, SageMaker, and ElastiCache
@@ -31,25 +32,76 @@ The Book Management System is a web application designed to manage books, review
 ## Local Setup
 
 1. **Clone the Repository**:
-   bash
-   git clone https://github.com/yourusername/book-management-system.git
-   cd book-management-system
+
+    ```
+    git clone https://github.com/yourusername/book-management-system.git
+    cd book-management-system
+    ```
+
 2. **Create a Virtual Environment**:
-    python3 -m venv venv
+
+    ```
+    python -m venv venv
     source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    ```
+
 3. **Install Backend Dependencies**:
-    bash
-    Copy code
+
+    ```
     pip install -r requirements.txt
+    pip install -r requirements-dev.txt  # For development and testing
+    ```
+
 4. **Set Up Environment Variables**:
-    Create a .env file in the project root and fill in the necessary environment variables. Use .env.example as a template.
-    DATABASE_URL=postgresql://username:password@hostname:port/dbname
+
+   Create a .env file in the project root and fill in the necessary environment variables. Use .env.example as a template.
+
+    ```
+    # Default
+    ENVIRONMENT=dev
+    LOG_LEVEL=DEBUG
+
+    # Server
+    HOST=0.0.0.0
+    PORT=8000
+    DEBUG=True
+    ALLOWED_HOSTS=localhost,127.0.0.1
+
+    # Database
+    DATABASE_URL=postgresql://postgres:T3sting@db/book_management
+
+    # Auth
     SECRET_KEY=your_secret_key
-5. **Initialize the Database**:
-    Run migrations or use the provided scripts to set up the database schema.
-    python init_db.py
-6. **Start the Backend Server**:
-    uvicorn app.main:app --reload
+    ALGORITHM=HS256
+    ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+    # Redis
+    REDIS_URL=redis://redis:6379/0
+    REDIS_CACHE_TTL=3600
+    USE_MOCK_REDIS=True
+
+    # ML
+    SAGEMAKER_ENDPOINT=recommendation-endpoint
+    USE_SAGEMAKER=False
+    ```
+
+## Docker Setup
+
+1. **Build the Docker Image**:
+
+    ```
+    docker-compose build
+    ```
+
+2. **Run the Application**:
+
+    ```
+    docker-compose up
+    ```
+
+## Access the API
+
+-  **http://127.0.0.1:8000/docs#/**
 
 ## AWS Deployment
     
@@ -61,17 +113,33 @@ The Book Management System is a web application designed to manage books, review
     Train and deploy your machine learning model using AWS SageMaker.
 4. **Implement Caching with ElastiCache**:
     Set up a Redis cluster on ElastiCache for caching recommendations.
-5. **Connect to AWS Services**:
+5. **Connect to AWS Services**: 
     Update your application to connect to the deployed AWS services.
 
-## Running Tests
+## Running Tests and Coverage 
 
 1. **Unit Tests**:
-    Run unit tests using pytest to verify the functionality of the backend services.
+    Run tests using pytest to verify the functionality of the backend services.
+    ```
+    pip install -r requirements-dev.txt
     pytest
-2. **Integration Tests**:
-    Integration tests ensure that all components of the system work together correctly.
-    pytest tests/integration
+    ```
+2. **Test Coverage**:
+    Run coverage using pytest to verify the coverage of the testing.
+    ```
+    pytest --cov=app --cov-report=term
+    ```
+
+## Known Issues and Limitations
+
+1. **AWS Integration**:
+    Integration with AWS services like S3 and SageMaker is planned but not yet implemented..
+2. **Summarization Service**
+    Currently a smaller model (*t5-small*) is being used for testing in summarization_service.py. It will be replaced with *Llama3* model.
+3. **Recommendation Service**
+    Currently a recommendation model is built using train_recommendation_model method.
+4. **Future Enhancements**:
+    The summarization service and recommendation service will be developed as separate modules and integrated later.
 
 ## Contributing
 
@@ -95,9 +163,3 @@ This project is licensed under the MIT License. See the LICENSE file for more de
 ### Contact
 Author: Vikram Vivek
 GitHub: VikramVivek
-
-### Instructions:
-
-- **Replace** `yourusername`, `your.email@example.com`, and other placeholders with your actual information.
-- **Update** the instructions if there are any specific setup steps or requirements unique to your project.
-- **Keep the README updated** as your project evolves, especially if new features are added or the setup process changes.

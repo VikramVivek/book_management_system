@@ -1,2 +1,3 @@
 [flake8]
 exclude = .venv, .tox, .eggs, build, dist, .git, .svn, __pycache__
+max-line-length = 88
