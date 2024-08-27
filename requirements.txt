@@ -12,7 +12,7 @@ boto3
 torch
 scikit-learn
 redis
-#psycopg2 #uncomment for local setup
 python-multipart
 transformers
 httpx
+psycopg2 #comment it if docker build throws error. it is explicitly intalled in Dockerfile
