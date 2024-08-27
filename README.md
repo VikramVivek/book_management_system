@@ -32,19 +32,30 @@ The Book Management System is a web application designed to manage books, review
 ## Local Setup
 
 1. **Clone the Repository**:
-   bash
-   git clone https://github.com/yourusername/book-management-system.git
-   cd book-management-system
+
+    ```
+    git clone https://github.com/yourusername/book-management-system.git
+    cd book-management-system
+    ```
+
 2. **Create a Virtual Environment**:
+
+    ```
     python -m venv venv
     source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    ```
+
 3. **Install Backend Dependencies**:
-    bash
-    Copy code
+
+    ```
     pip install -r requirements.txt
     pip install -r requirements-dev.txt  # For development and testing
+    ```
+
 4. **Set Up Environment Variables**:
-    Create a .env file in the project root and fill in the necessary environment variables. Use .env.example as a template.
+
+   Create a .env file in the project root and fill in the necessary environment variables. Use .env.example as a template.
+
     ```
     # Default
     ENVIRONMENT=dev
@@ -73,13 +84,17 @@ The Book Management System is a web application designed to manage books, review
     SAGEMAKER_ENDPOINT=recommendation-endpoint
     USE_SAGEMAKER=False
     ```
+
 ## Docker Setup
 
 1. **Build the Docker Image**:
+
     ```
     docker-compose build
     ```
+
 2. **Run the Application**:
+
     ```
     docker-compose up
     ```
@@ -119,7 +134,11 @@ The Book Management System is a web application designed to manage books, review
 
 1. **AWS Integration**:
     Integration with AWS services like S3 and SageMaker is planned but not yet implemented..
-2. **Future Enhancements**:
+2. **Summarization Service**
+    Currently a smaller model (*t5-small*) is being used for testing in summarization_service.py. It will be replaced with *Llama3* model.
+3. **Recommendation Service**
+    Currently a recommendation model is built using train_recommendation_model method.
+4. **Future Enhancements**:
     The summarization service and recommendation service will be developed as separate modules and integrated later.
 
 ## Contributing
